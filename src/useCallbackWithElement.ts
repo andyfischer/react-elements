@@ -1,8 +1,8 @@
 
 import { useEffect } from 'react'
 
-type CleanupFunc = () => void
-type Callback = (el: Element) => CleanupFunc | void
+type CleanupFunc = () => void;
+type Callback = (el: Element) => CleanupFunc | void;
 
 export function useCallbackWithElement(id: string, callback: Callback) {
 

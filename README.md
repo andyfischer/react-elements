@@ -1,9 +1,10 @@
 
 # react-elements #
 
-Helper library for easily using atomic CSS styles (like Tailwind) in React.js components.
+Helper library for easily using atomic CSS styles in React.js components.
+Lets you declare your CSS class names directly on the React element. Works great with Tailwind CSS.
 
-An alternative to the commonly used `classnames` library (aka the `cn` prop) for declaring CSS styles on components.
+An alternative to the commonly used `classnames` library (aka the `cn` prop).
 
 ### Quick Example ###
 
@@ -37,9 +38,11 @@ Another export is called `<StyleWrap/>`.
 This will transform the incoming props, but instead of creating an element, StyleWrap will
 apply the styles to the child element.
 
-Can be useful if you want to add CSS styling to an element that isn't declared above.
+Can be useful if you want to add CSS styling onto an element that isn't declared above.
 
 Example:
+
+    import { StyleWrap } from '@andyfischer/react-elements'
 
     <StyleWrap bg-slate-200>
       <table>
@@ -68,15 +71,15 @@ All the components use the following rules for transforming the incoming props i
 | `style`       | preserved as `style` prop. The contents of the 'style' object might be combined with other props. |
 | `class`       | maps to `className` |
 | `className`   | preserved as `className` prop. May be combined with other class names. |
-| `caption`,`del`,`h1`,`h2`,`h3`,`h4`,`h5`,`ins`,`nav`,`pre`  | overrides the element name (such as `<h1>...</h1>`) and also adds the name to the CSS classes. See "Style-focused HTML tags" below. |
+| looks like `on...` (such as `onClick`) | preserved as a React prop. |
 | `disabled`    | preserved as `disabled` prop and also adds `.disabled` to the CSS classes. |
 | `grid`        | adds `.grid` to the CSS classes. Also if this prop has a value, it's used as `{grid: ...}` in the `style` object |
 | `gridArea`    | sets the value as `{gridArea: ...}` in the `style` object. |
 | `gridColumn`    | sets the value as `{gridColumn: ...}` in the `style` object. |
 | `gridRow`    | sets the value as `{gridRow: ...}` in the `style` object. |
-| looks like `onX` (like `onClick`) | preserved as a React prop. |
-| `passthrough` | the object's contents are all directly passed into the underlying element's props. |
-| anything else not not mentioned | adds the prop as a CSS class. If the prop has a value, then the class is only added if the value is truthy. |
+| `caption`,`del`,`h1`,`h2`,`h3`,`h4`,`h5`,`ins`,`nav`,`pre`  | overrides the element name (such as `<h1>...</h1>`) and also adds the name to the CSS classes. See "Style-focused HTML tags" below. |
+| `passthrough` | passes the object's contents directly into the underlying element's props. |
+| anything else not not mentioned above | adds the prop as a CSS class. If the prop has a value, then the class is only added if the value is truthy. |
 
 ### Example: Truthy props ###
 
@@ -102,12 +105,14 @@ This renders the following HTML:
 
 ### Example: Style-focused HTML tags ###
 
-For props that are one of the "style-focused" HTML tags (listed below), we handle them by:
+This library takes a little opinion in categorizing HTML tags into some that are mainly style-focused, compared to some tags that define structure or behavior.
+
+The "style-focused" HTML tags here are: `caption`,`del`,`h1`,`h2`,`h3`,`h4`,`h5`,`ins`,`nav`,`pre`.
+
+For props that match one of these tags, we handle them by:
 
  1) Overriding the HTML element to that tag (instead of `<div>`)
- 2) Adding that name as one of the CSS classes.
-
-The "style-focused" HTML tags in this library are: `caption`,`del`,`h1`,`h2`,`h3`,`h4`,`h5`,`ins`,`nav`,`pre`,
+ 2) Also adding that name as one of the CSS classes.
 
 Example:
 

@@ -1,6 +1,6 @@
 {
   "name": "@andyfischer/react-elements",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Collection of helper components for React.js",
   "type": "module",
   "main": "dist/index.js",
@@ -12,5 +12,9 @@
   "devDependencies": {
     "react": "^18.2.0",
     "typescript": "^5.2.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andyfischer/react-elements.git"
+   }
 }

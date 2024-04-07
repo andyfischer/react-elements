@@ -90,7 +90,7 @@ export function deriveProps(props: any, defaultElementName: string = 'div'): { e
         case c_passthrough:
             finalProps = {
                 ...finalProps,
-                ...value,
+                ...(value as any),
             };
             continue;
 

@@ -2,9 +2,8 @@
 import { createElement, cloneElement, Children, } from 'react'
 
 const c_prop = 1;
-const c_propAndClassName = 2;
 const c_ignore = 3;
-const c_style = 4;
+const c_styleObject = 4;
 const c_passthrough = 5;
 const c_className = 6;
 const c_styleField = 7;
@@ -16,7 +15,7 @@ const propBehavior: { [name:string]: number } = {
     key: c_prop,
     children: c_prop,
     ref: c_ignore,
-    style: c_style,
+    style: c_styleObject,
     passthrough: c_passthrough,
 
     // Class name
@@ -24,15 +23,11 @@ const propBehavior: { [name:string]: number } = {
     className: c_className,
 
     // HTML props
-    id: c_prop,
-    type: c_prop,
-    src: c_prop,
-    tabIndex: c_prop,
     grid: c_grid,
     gridArea: c_styleField,
     gridColumn: c_styleField,
     gridRow: c_styleField,
-    disabled: c_propAndClassName,
+    flex: c_styleField,
 
     // Element names
     ins: c_elementName,
@@ -45,10 +40,6 @@ const propBehavior: { [name:string]: number } = {
     h3: c_elementName,
     h4: c_elementName,
     h5: c_elementName,
-}
-
-function isUpperCase(s: string) {
-    return s && (s === s.toUpperCase());
 }
 
 export function deriveProps(props: any, defaultElementName: string = 'div'): { elementName: string, finalProps: any } {
@@ -71,13 +62,7 @@ export function deriveProps(props: any, defaultElementName: string = 'div'): { e
             finalProps[key] = value;
             continue;
 
-        case c_propAndClassName:
-            if (value)
-                classNames.push(key);
-            finalProps[key] = value;
-            continue;
-
-        case c_style:
+        case c_styleObject:
             if (finalProps.style) {
                 finalProps.style = {
                     ...finalProps.style,
@@ -101,33 +86,31 @@ export function deriveProps(props: any, defaultElementName: string = 'div'): { e
             continue;
 
         case c_grid:
-            classNames.push('grid')
-            if (value && value !== '' && value != true) {
-                finalProps.style = finalProps.style || {};
-                finalProps.style['grid'] = value;
+            if (value) {
+                if (value == true) {
+                    classNames.push('grid');
+                } else {
+                    finalProps.style = finalProps.style || {};
+                    finalProps.style['grid'] = value;
+                    finalProps.style['display'] = 'grid';
+                }
             }
             continue;
 
         case c_styleField:
-            finalProps.style = finalProps.style || {};
-            finalProps.style[key] = value;
+            if (value) {
+                if (value == true) {
+                    classNames.push(key);
+                } else {
+                    finalProps.style = finalProps.style || {};
+                    finalProps.style[key] = value;
+                }
+            }
             continue;
         }
 
         // Didn't find it in the propBehavior map.
 
-        // Look for event handlers like onX. Pass those through as React props.
-        if (key[0] === 'o' && key[1] === 'n' && isUpperCase(key[2])) {
-            finalProps[key] = value;
-            continue;
-        }
-
-        // Pass data-* through as HTML attributes
-        if (key.startsWith('data-')) {
-            finalProps[key] = value;
-            continue;
-        }
-        
         // Pass var--* through as a CSS variable.
         if (key.indexOf('var--') === 0) {
             // CSS variable

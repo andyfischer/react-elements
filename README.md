@@ -1,10 +1,11 @@
 
 # react-elements #
 
-Helper library for easily using atomic CSS styles in React.js components.
-Lets you declare your CSS class names directly on the React element. Works great with Tailwind CSS.
+Helper components for using atomic CSS with React.
 
-An alternative to the commonly used `classnames` library (aka the `cn` prop).
+These components allow you to directly add CSS class names onto the React element.
+
+Works great with Tailwind CSS. An alternative to using the `classnames` library.
 
 ### Quick Example ###
 
@@ -12,7 +13,9 @@ This sample code:
 
     import { Span } from '@andyfischer/react-elements'
 
-    return <Span m-1 p-1 flex border rounded-sm>...</Span>
+    return (
+      <Span m-1 p-1 flex border rounded-sm>...</Span>
+    )
 
 Renders HTML that looks like:
 
@@ -26,10 +29,14 @@ Each one will transform the incoming props into a className. (see below for the 
 
 | component | renders to HTML |
 | --------- | --------------- |
-| `<Block {...props}>` | `<div ...>`         |
-| `<Span {...props}>` | `<span ...>`         |
-| `<Img {...props}>` | `<img ...>`         |
 | `<Button {...props}>` | `<button ...>`         |
+| `<Block {...props}>` | `<div ...>`         |
+| `<Form {...props}>` | `<form ...>`         |
+| `<Img {...props}>` | `<img ...>`         |
+| `<Input {...props}>` | `<input ...>`         |
+| `<Span {...props}>` | `<span ...>`         |
+| `<Select {...props}>` | `<select ...>`         |
+| `<Pre {...props}>` | `<pre ...>`         |
 
 ### StyleWrap
 
@@ -56,68 +63,111 @@ Renders HTML that looks like:
       ...
     </table>
 
-# Prop transformation rules #
+# Prop transformation logic #
 
-All the components use the following rules for transforming the incoming props into the className (or other props).
+In most cases (with exceptions listed below), the logic for handling props on any react-elements components is as follows:
 
-| incoming prop | translates to |
-| ------------- | ------------- |
-| `key`         | preserved as `key` prop    |
-| `children`    | preserved as `children` prop    |
-| `id`          | preserved as `id` prop |
-| `type`        | preserved as `type` prop |
-| `src`         | preserved as `src` prop |
-| `tabIndex`    | preserved as `tabIndex` prop |
-| `style`       | preserved as `style` prop. The contents of the 'style' object might be combined with other props. |
-| `class`       | maps to `className` |
-| `className`   | preserved as `className` prop. May be combined with other class names. |
-| looks like `on...` (such as `onClick`) | preserved as a React prop. |
-| `disabled`    | preserved as `disabled` prop and also adds `.disabled` to the CSS classes. |
-| `grid`        | adds `.grid` to the CSS classes. Also if this prop has a value, it's used as `{grid: ...}` in the `style` object |
-| `gridArea`    | sets the value as `{gridArea: ...}` in the `style` object. |
-| `gridColumn`    | sets the value as `{gridColumn: ...}` in the `style` object. |
-| `gridRow`    | sets the value as `{gridRow: ...}` in the `style` object. |
-| `caption`,`del`,`h1`,`h2`,`h3`,`h4`,`h5`,`ins`,`nav`,`pre`  | overrides the element name (such as `<h1>...</h1>`) and also adds the name to the CSS classes. See "Style-focused HTML tags" below. |
-| `passthrough` | passes the object's contents directly into the underlying element's props. |
-| anything else not not mentioned above | adds the prop as a CSS class. If the prop has a value, then the class is only added if the value is truthy. |
-
-### Example: Truthy props ###
-
-For props that are interpreted as CSS classes, these can use a boolean value to control whether they are enabled or not.
-
-This example code uses a boolean on the `selected` class:
-
-    const items = [{},{},{}]
-    const selectedIndex = 1;
-
-    return items.map((item, index) =>
-        <Block
-            key={index}
-            selected={index === selectedIndex}
-        />
-    );
-
-This renders the following HTML:
-
-    <div key="0"></div>
-    <div key="1" class="selected"></div>
-    <div key="2"></div>
-
-### Example: Style-focused HTML tags ###
-
-This library takes a little opinion in categorizing HTML tags into some that are mainly style-focused, compared to some tags that define structure or behavior.
-
-The "style-focused" HTML tags here are: `caption`,`del`,`h1`,`h2`,`h3`,`h4`,`h5`,`ins`,`nav`,`pre`.
-
-For props that match one of these tags, we handle them by:
-
- 1) Overriding the HTML element to that tag (instead of `<div>`)
- 2) Also adding that name as one of the CSS classes.
+ 1) If the prop's value is non-boolean, then preserve the property onto the underlying component. From there it follows the default React behavior.
 
 Example:
 
-    <Block h1 />
+    <Img src="url" />
 
-Renders the following HTML:
+The `src` has a string value so this renders to:
 
-    <h1 class="h1">
+    <img src="url" />
+
+ 2) If the prop's value is exactly `true` then treat it as a CSS classname (with some exceptions below).
+
+Example:
+
+    <Span p-1 m-1 />
+
+Renders to:
+
+    <span className="p-1 m-1 />
+
+ 3) If the prop's value is exactly `false` then ignore it. This can help implement CSS classes that are conditional.
+
+Example:
+
+    <Span selected={false} />
+
+Renders to:
+
+    <span />
+
+## Special Cases ##
+
+#### Special prop: 'className' ####
+
+You can add a className string and it'll be correctly combined with any additional CSS classes.
+
+Example:
+
+    <Block m-1 className="selected" />
+
+Renders to:
+
+    <Block className="m-1 selected" />
+
+#### Props that map into the style={} section ####
+
+For these props, if they have a non-boolean value, then they are passed into the element's `style` object.
+
+Includes:
+
+| prop name |
+| --------- |
+| `grid` |
+| `gridArea` |
+| `gridColumn` |
+| `gridRow` |
+| `flex` |
+
+Example:
+
+    <Block gridArea="1 / 2" />
+
+Renders to:
+
+    <div style={{ gridArea: "1 / 2 "}} 
+
+#### Special prop: 'grid' ####
+
+If the `grid` prop has a value, then it's copied into the `style` object, AND the element's style is set to `display: grid`.
+
+Example:
+
+    <Block grid="repeat(2, 60px) / auto-flow 80px" />
+
+Renders to:
+
+    <div style={{ display: 'grid', grid: 'repeat(2, 60px) / auto-flow 80px' }} />
+
+#### Props that are style-focused tag names ####
+
+This library takes an opinion in that some HTML tag names are primarily style-focused, and we can list them in
+the same way as CSS classnames. When one of these is used, it overrides the default tag name.
+
+This includes the tag names: `caption`,`del`,`h1`,`h2`,`h3`,`h4`,`h5`,`ins`,`nav`,`pre`.
+
+Example:
+
+    <Block h1 p-1>
+
+Renders to:
+
+    <h1 className="p-1" />
+
+#### Props that start with `var--` ####
+
+If the prop name starts with `var--` then it's treated as a CSS variable.
+
+Example:
+
+    <Block var--color="#fff">
+
+Renders to:
+    <div style={{'--color': '#fff'}} />
+

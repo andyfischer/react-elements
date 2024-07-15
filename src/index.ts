@@ -189,21 +189,31 @@ export function Pre(props: any) {
 }
 
 export function StyleWrap(props: any) {
+
     let derived = deriveProps(props, 'div');
 
     delete derived.finalProps.children;
 
     return Children.map(props.children, child => {
 
-        let className = derived.finalProps.className;
+        let classProp = 'className';
 
-        if (child.props.className && child.props.className != '')
-            className = child.props.className + '  ' + className;
+        // Check for web component
+        try {
+            if (typeof child.type === 'string' && /^[a-z]/.test(child.type) && child.type.includes('-')) {
+                classProp = 'class';
+            }
+        } catch (e) { }
 
+        let existingClass = child.props[classProp] || '';
+        let newClass = derived.finalProps.className;
+
+        if (newClass && newClass != '')
+            newClass = existingClass + '  ' + newClass;
 
         const cloned = cloneElement(child, {
             ...derived.finalProps,
-            className,
+            [ classProp ]: newClass
         });
 
         return cloned;
